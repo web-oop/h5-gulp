@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>大转盘活动</title>
+    <script src="lib/base.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <div class="page turntable-page">
+        <header class="common-header">
+            <a href="javascript:void(0)" onclick="pageObj.finish()" class="header-left icon-back"></a>
+            <div class="header-title">
+                大转盘活动
+            </div>
+            <!--<a href="javascript:void(0)" onclick="pageObj.shareFun()" class="header-right icon-share">
+            </a>-->
+        </header>
+        <p class="link-myaward" onclick="pageObj.showAward()"></p>
+        <p class="link-rule" onclick="pageObj.showRule()"></p>
+        <div class="turntable-warp">
+            <i class="tag-head"></i>
+            <div class="turntable-bg"></div>
+            <div class="turntable-split" id="goods_list">
+                <div class="per-award award-1">
+                    <p class="img">
+                        <img src="images/award-pic-4.png" alt="">
+                    </p>
+                </div>
+                <div class="per-award award-2">
+                    <p class="img">
+                        <img src="images/award-pic-3.png" alt="">
+                    </p>
+                </div>
+                <div class="per-award award-3">
+                    <p class="img">
+                        <img src="images/award-pic-1.png" alt="">
+                    </p>
+                </div>
+                <div class="per-award award-4">
+                    <p class="img">
+                        <img src="images/award-pic-3.png" alt="">
+                    </p>
+                </div>
+                <div class="per-award award-5">
+                    <p class="img">
+                        <img src="images/award-pic-2.png" alt="">
+                    </p>
+                </div>
+                <div class="per-award award-6">
+                    <p class="img">
+                        <img src="images/award-pic-3.png" alt="">
+                    </p>
+                </div>
+            </div>
+            <div class="turntable-pointer transition">
+                <i></i>
+            </div>
+            <p class="turntable-pointer-text" onclick="pageObj.startRun()">
+            </p>
+        </div>
+        <div class="turntable-bottom">
+            <p class="run-chance ellipsis">你有<span class="count" id="count"></span>次抽奖机会</p>
+            <p class="run-tip" id="tips">完成21天阅读打卡的宝贝可参与抽奖~</p>
+        </div>
+        <div class="award-log">
+            <i class="btn-close" onclick="pageObj.hideScroll()"></i>
+            <div class="log-list">
+                <div id="scrollList" class="transition">
+                    <ul>
+                        <li>获奖展示区</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script id="select_baby_temp" type="text/template">
+        <div class="select-baby">
+            <p class="dialog-title">选择参与的宝宝</p>
+            <div class="dialog-con">
+                <ul class="baby-list clearfix">
+                    {{each data as child index}}
+                    <li onclick="pageObj.selectBaby(this,'{{child.qh_child_id}}')" class="{{if child.qh_child_id==currChild }}active{{/if}}">
+                        <div class="photo">
+                            <p class="pic">
+                                <img src="{{child.child_pic+'~~'+child.sex|childPhoto}}" alt="">
+                            </p>
+                            <i></i>
+                        </div>
+                        <p class="name ellipsis">{{child.child_name}}</p>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+            <div class="dialog-btn clearfix">
+                <button class="btn btn-default" style="float: left;" onclick="pageObj.finish()">返回</button>
+                <button class="btn btn-ok" style="float: right;" onclick="pageObj.confirmBaby()">确定</button>
+            </div>
+        </div>
+    </script>
+    <script id="goods_list_temp" type="text/template">
+        {{each goods as item index}}
+        <div class="per-award award-{{index+1}}" title="{{item.title}}" data-id="{{item.qh_actprize_id}}">
+            <p class="img">
+                <img src="{{item.pic}}" alt="">
+            </p>
+        </div>
+        {{/each}}
+    </script>
+    <script id="run_result_temp" type="text/template">
+        <div class="result-con">
+            <i class="dialog-close" onclick="pageObj.dialogClose()"></i>
+            {{if isthanks=='1'}}
+            <p class="result-title">很遗憾，没有中奖诶~</p>
+            <div class="result-pic">
+                <img src="{{img}}" alt="">
+            </div>
+            <p class="result-tip">可能姿势不对，洗个手再来一次</p>
+            {{else}}
+            <p class="result-title">恭喜宝贝抽中了</p>
+            <div class="result-pic">
+                <img src="{{img}}" alt="">
+            </div>
+            <p class="result-tip">实物奖品将直接发放到您所在幼儿园</p>
+            {{/if}}
+        </div>
+    </script>
+    <script id="scroll_list_temp" type="text/template">
+        <ul>
+            {{each data as item index}}
+            <li>
+                {{item}}
+            </li>
+            {{/each}}
+        </ul>
+    </script>
+    <script id="award_record_temp" type="text/template">
+        <div class="award-con">
+            <i class="dialog-close" onclick="pageObj.dialogClose()"></i>
+            <div class="award-head">
+                <p class="title">中奖记录</p>
+            </div>
+            <div class="award-list">
+                {{if data.length==0}}
+                <div class="common-empty">
+                    <p class="text">还没有获得奖品哦~</p>
+                </div>
+                {{else}}
+                <ul>
+                    {{each data as item index}}
+                    <li class="common-box {{if item.state=='1'}} active{{/if}}">
+                        <p class="pic">
+                            <img src="{{item.pic}}" alt="">
+                        </p>
+                        <div class="award-msg">
+                            <p class="award-name">{{item.title}}</p>
+                            <p class="date">{{item.createat}}</p>
+                            <p class="des">
+                                其他说明：实物奖品将直接发放到您所在幼儿园
+                            </p>
+                        </div>
+                    </li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+                <!-- <div class="award-tip">
+                    活动下架后您可以在<span>个人中心-我的奖品</span>中查看奖品发放进度
+                </div> -->
+            </div>
+        </div>
+    </script>
+
+    <script src="lib/zepto.min.js"></script>
+    <script>
+        Zepto(function($){
+            /*触摸添加样式 touch*/
+            $(document).on("touchstart",".btn",function(){
+                $(this).addClass("touch");
+            });
+            /*触摸结束删除样式 touch*/
+            $(document).on("touchend touchmove touchcancel",".btn",function(){
+                $(this).removeClass("touch");
+            });
+        });
+    </script>
+    <script src="lib/layer/layer.js"></script>
+    <script src="lib/template-web.js"></script>
+    <script src="js/index.js"></script>
+    <script>
+        pageObj.global.token=pageObj.GetQueryString('token');
+    </script>
+    
+</body>
+</html>
